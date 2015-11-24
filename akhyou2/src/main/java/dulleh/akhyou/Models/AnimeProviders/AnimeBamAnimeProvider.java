@@ -22,9 +22,9 @@ public class AnimeBamAnimeProvider implements AnimeProvider {
 
         Element main = isolate(body);
 
-        Anime anime = new Anime()
-                .setUrl(url)
-                .setProviderType(Anime.ANIME_BAM);
+        Anime anime = null;
+//        Anime anime = new Anime()
+//                .setUrl(url);
 
         anime = parseForInfo(main, anime);
 
@@ -35,7 +35,7 @@ public class AnimeBamAnimeProvider implements AnimeProvider {
 
     @Override
     public Anime updateCachedAnime(Anime cachedAnime) throws OnErrorThrowable {
-        Anime updatedAnime = fetchAnime(cachedAnime.getUrl());
+        Anime updatedAnime = null; //fetchAnime(cachedAnime.getUrl());
 
         updatedAnime.inheritWatchedFrom(cachedAnime.getEpisodes());
 
@@ -68,14 +68,14 @@ public class AnimeBamAnimeProvider implements AnimeProvider {
     private Anime parseForInfo (Element main, Anime anime) {
         Element info = main.select("div.fattynav > div.fattynavinside > div.container > div.media").first();
 
-        anime.setImageUrl(info.child(0).select("img").attr("src"));
-
-        info = info.select("div.media-body").first();
-
-        anime.setTitle(info.select("div.first > h1").text().trim());
-
-        String status = info.select("div.first > p").first().children().get(1).text();
-        anime.setStatus(status.substring(status.indexOf(": ") + 2));
+//        anime.setImageUrl(info.child(0).select("img").attr("src"));
+//
+//        info = info.select("div.media-body").first();
+//
+//        anime.setTitle(info.select("div.first > h1").text().trim());
+//
+//        String status = info.select("div.first > p").first().children().get(1).text();
+//        anime.setStatus(status.substring(status.indexOf(": ") + 2));
 
         info = info.children().last();
 
@@ -84,9 +84,9 @@ public class AnimeBamAnimeProvider implements AnimeProvider {
         for (Element e : genres) {
             genresBuilder.append(e.text() + ", ");
         }
-        anime.setGenresString(genresBuilder.toString().substring(0, genresBuilder.length() - 2));
-
-        anime.setDesc(info.select("p.ptext").text());
+//        anime.setGenresString(genresBuilder.toString().substring(0, genresBuilder.length() - 2));
+//
+//        anime.setDesc(info.select("p.ptext").text());
 
         return anime;
     }

@@ -1,7 +1,9 @@
 package dulleh.akhyou.Anime;
 
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -53,9 +55,10 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
         TypedValue colorPrimary = new TypedValue();
         getActivity().getTheme().resolveAttribute(R.attr.colorPrimary, colorPrimary, true);
 
-        episodesAdapter = new AnimeAdapter(new ArrayList<>(), this, getResources().getColor(android.R.color.black), getResources().getColor(colorPrimary.resourceId));
+        int black = ContextCompat.getColor(getContext(), android.R.color.black);
+        int primary = ContextCompat.getColor(getContext(), colorPrimary.resourceId);
+        episodesAdapter = new AnimeAdapter(new ArrayList<>(), this, black, primary);
         setHasOptionsMenu(true);
-
     }
 
     @Nullable
@@ -72,12 +75,7 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
 
         refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
         refreshLayout.setColorSchemeResources(R.color.accent);
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getPresenter().fetchAnime(true);
-            }
-        });
+        refreshLayout.setOnRefreshListener(() -> getPresenter().fetchAnime(true));
 
         updateRefreshing();
 
@@ -143,7 +141,7 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
     // returns false if it cannot check.
     public boolean isInFavourites(Anime anime) {
         try {
-            return ((MainActivity) getActivity()).getPresenter().getModel().isInFavourites(anime.getUrl());
+            return ((MainActivity) getActivity()).getPresenter().getModel().isInFavourites(anime.getHummingbirdId());
         } catch (IllegalStateException e) {
             getPresenter().postError(e);
             return false;
@@ -171,17 +169,16 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
     }
 
     public void setToolbarTitle (String title) {
-        ((MainActivity) getActivity()).getSupportActionBar().setTitle(title);
+        ActionBar actionBar = getActivity().getActionBar();
+
+        if (actionBar != null) {
+            actionBar.setTitle(title);
+        }
     }
 
     public void setFavouriteChecked(boolean isInFavourites) {
         episodesAdapter.setFabChecked(isInFavourites);
         getPresenter().setNeedToGiveFavourite(false);
-    }
-
-
-    private void setRefreshLayoutStatus (boolean setEnabled) {
-        refreshLayout.setEnabled(setEnabled);
     }
 
     @Override
@@ -192,7 +189,9 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
 
     @Override
     public void onLongClick(Episode item, @Nullable Integer position) {
-        getPresenter().flipWatched(position);
+        if (position != null) {
+            getPresenter().flipWatched(position);
+        }
     }
 
     public void showSourcesDialog (List<Source> sources) {
@@ -204,12 +203,7 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
             new MaterialDialog.Builder(getActivity())
                     .title(getString(R.string.sources))
                     .items(getSourcesAsCharSequenceArray(sources))
-                    .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
-                        @Override
-                        public boolean onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
-                            return true;
-                        }
-                    })
+                    .itemsCallbackSingleChoice(0, (materialDialog, view, i, charSequence) -> true)
                     .callback(new MaterialDialog.ButtonCallback() {
 
                         @Override
@@ -255,12 +249,8 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
         new MaterialDialog.Builder(getActivity())
                 .title(getString(R.string.quality))
                 .items(getVideosAsCharSequenceArray(videos))
-                .itemsCallback(new MaterialDialog.ListCallback() {
-                    @Override
-                    public void onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
-                        getPresenter().downloadOrStream(videos.get(i), download);
-                    }
-                })
+                .itemsCallback((materialDialog, view, i, charSequence)
+                    -> getPresenter().downloadOrStream(videos.get(i), download))
                 .show();
     }
 
@@ -268,12 +258,7 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> implem
         getActivity().getLayoutInflater().inflate(R.layout.image_dialog_content, relativeLayout);
 
         ImageView imageView = (ImageView) getActivity().findViewById(R.id.image_dialog_image_view);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                relativeLayout.removeView(imageView);
-            }
-        });
+        imageView.setOnClickListener(view -> relativeLayout.removeView(imageView));
 
         Picasso.with(getActivity())
                 .load(getPresenter().lastAnime.getImageUrl())

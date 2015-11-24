@@ -50,12 +50,10 @@ public class KissAnimeSearchProvider implements SearchProvider {
         return parseElements(resultTable.select("td[title]"));
     }
 
-    @Override
     public Element isolate(String document) {
         return Jsoup.parse(document).select(".listing").first();
     }
 
-    @Override
     public boolean hasSearchResults(Element element) throws OnErrorThrowable {
         return element.select("td[title]").size() > 0;
     }
@@ -63,14 +61,14 @@ public class KissAnimeSearchProvider implements SearchProvider {
     private List<Anime> parseElements(Elements rows) {
         List<Anime> results = new ArrayList<>(rows.size());
         for (Element row : rows) {
-            Anime anime = new Anime().setProviderType(Anime.ANIME_KISS);
+            Anime anime = null;
             String titleTag = row.attr("title");
             Matcher matcher = PARSER.matcher(titleTag);
             if (matcher.find()) {
-                anime.setImageUrl(matcher.group(1))
-                     .setUrl(BASE_URL + matcher.group(2))
-                     .setTitle(matcher.group(3))
-                     .setDesc(matcher.group(4));
+//                anime.setImageUrl(matcher.group(1))
+//                     .setUrl(BASE_URL + matcher.group(2))
+//                     .setTitle(matcher.group(3))
+//                     .setDesc(matcher.group(4));
             }
             results.add(anime);
         }

@@ -46,8 +46,7 @@ public class PersistentCookieStore implements CookieStore
     private Map<URI, Set<HttpCookie>> allCookies;
 
     public PersistentCookieStore(Context context) {
-        sharedPreferences = context.getSharedPreferences(SP_COOKIE_STORE,
-                Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(SP_COOKIE_STORE, Context.MODE_PRIVATE);
         loadAllFromPersistence();
     }
 
@@ -61,8 +60,7 @@ public class PersistentCookieStore implements CookieStore
             try {
                 URI uri = new URI(uriAndName[0]);
                 String encodedCookie = (String) entry.getValue();
-                HttpCookie cookie = new SerializableHttpCookie()
-                        .decode(encodedCookie);
+                HttpCookie cookie = new SerializableHttpCookie().decode(encodedCookie);
 
                 Set<HttpCookie> targetCookies = allCookies.get(uri);
                 if (targetCookies == null) {
@@ -133,8 +131,8 @@ public class PersistentCookieStore implements CookieStore
     @Override
     public synchronized List<HttpCookie> getCookies() {
         List<HttpCookie> allValidCookies = new ArrayList<>();
-        for (Iterator<URI> it = allCookies.keySet().iterator(); it.hasNext(); ) {
-            allValidCookies.addAll(getValidCookies(it.next()));
+        for (URI uri : allCookies.keySet()) {
+            allValidCookies.addAll(getValidCookies(uri));
         }
 
         return allValidCookies;
@@ -144,8 +142,7 @@ public class PersistentCookieStore implements CookieStore
         Set<HttpCookie> targetCookies = new HashSet<>();
         // If the stored URI does not have a path then it must match any URI in
         // the same domain
-        for (Iterator<URI> it = allCookies.keySet().iterator(); it.hasNext(); ) {
-            URI storedUri = it.next();
+        for (URI storedUri : allCookies.keySet()) {
             // Check ith the domains match according to RFC 6265
             if (checkDomainsMatch(storedUri.getHost(), uri.getHost())) {
                 // Check if the paths match according to RFC 6265
@@ -158,8 +155,7 @@ public class PersistentCookieStore implements CookieStore
         // Check it there are expired cookies and remove them
         if (!targetCookies.isEmpty()) {
             List<HttpCookie> cookiesToRemoveFromPersistence = new ArrayList<>();
-            for (Iterator<HttpCookie> it = targetCookies.iterator(); it
-                    .hasNext(); ) {
+            for (Iterator<HttpCookie> it = targetCookies.iterator(); it.hasNext();) {
                 HttpCookie currentCookie = it.next();
                 if (currentCookie.hasExpired()) {
                     cookiesToRemoveFromPersistence.add(currentCookie);
@@ -209,8 +205,7 @@ public class PersistentCookieStore implements CookieStore
     private void removeFromPersistence(URI uri, List<HttpCookie> cookiesToRemove) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         for (HttpCookie cookieToRemove : cookiesToRemove) {
-            editor.remove(uri.toString() + SP_KEY_DELIMITER
-                    + cookieToRemove.getName());
+            editor.remove(uri.toString() + SP_KEY_DELIMITER + cookieToRemove.getName());
         }
         editor.apply();
     }
@@ -233,8 +228,7 @@ public class PersistentCookieStore implements CookieStore
 
     private void removeFromPersistence(URI uri, HttpCookie cookieToRemove) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(uri.toString() + SP_KEY_DELIMITER
-                + cookieToRemove.getName());
+        editor.remove(uri.toString() + SP_KEY_DELIMITER + cookieToRemove.getName());
         editor.apply();
     }
 

@@ -1,7 +1,9 @@
 package dulleh.akhyou.Anime;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +42,7 @@ public class AnimeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         paletteTransform = new PaletteTransform();
     }
 
-    public void setAnime (List<Episode> episodes, boolean isInFavourites) {
+    public void setAnime(List<Episode> episodes, boolean isInFavourites) {
         this.clear();
         this.episodes = episodes;
         this.isInFavourites = isInFavourites;
@@ -88,21 +90,13 @@ public class AnimeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                         .from(parent.getContext())
                         .inflate(R.layout.anime_header, parent, false));
 
-                headerViewHolder.favouriteFab.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        isInFavourites = !isInFavourites;
-                        animeFragment.getPresenter().onFavouriteCheckedChanged(isInFavourites);
-                        headerViewHolder.favouriteFab.setImageDrawable(favouriteIcon());
-                    }
+                headerViewHolder.favouriteFab.setOnClickListener(view -> {
+                    isInFavourites = !isInFavourites;
+                    animeFragment.getPresenter().onFavouriteCheckedChanged(isInFavourites);
+                    headerViewHolder.favouriteFab.setImageDrawable(favouriteIcon());
                 });
 
-                headerViewHolder.coverImageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        animeFragment.showImageDialog();
-                    }
-                });
+                headerViewHolder.coverImageView.setOnClickListener(view -> animeFragment.showImageDialog());
 
                 return headerViewHolder;
 
@@ -140,10 +134,10 @@ public class AnimeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                          }
                      });
 
-            headerViewHolder.genresView.setText(anime.getGenresString());
-            headerViewHolder.descView.setText(anime.getDesc());
+            headerViewHolder.genresView.setText(anime.getGenreString());
+            headerViewHolder.descView.setText(anime.getSynopsis());
             headerViewHolder.alternateTitleView.setText(anime.getAlternateTitle());
-            headerViewHolder.dateView.setText(anime.getDate());
+            headerViewHolder.dateView.setText(anime.getAiringString());
             headerViewHolder.statusView.setText(anime.getStatus());
             headerViewHolder.favouriteFab.setImageDrawable(favouriteIcon());
             /// / CHECK IF IN FAVOURITES
@@ -169,19 +163,12 @@ public class AnimeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 episodeViewHolder.titleView.setTextColor(unwatchedColour);
             }
 
-            episodeViewHolder.titleView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    animeFragment.onCLick(episodes.get(actualPosition), actualPosition);
-                }
-            });
+            episodeViewHolder.titleView.setOnClickListener(view
+                -> animeFragment.onCLick(episodes.get(actualPosition), actualPosition));
 
-            episodeViewHolder.titleView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    animeFragment.onLongClick(episodes.get(actualPosition), actualPosition);
-                    return false;
-                }
+            episodeViewHolder.titleView.setOnLongClickListener(view -> {
+                animeFragment.onLongClick(episodes.get(actualPosition), actualPosition);
+                return false;
             });
         }
     }
@@ -206,18 +193,12 @@ public class AnimeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         return VIEW_TYPE_FOOTER;
     }
 
-    public Episode getItemAtPosition (int position) {
-        if (episodes != null) {
-            return episodes.get(position);
-        }
-        return null;
-    }
-
     private Drawable favouriteIcon () {
+        Context context = animeFragment.getContext();
         if (isInFavourites) {
-            return animeFragment.getResources().getDrawable(R.drawable.ic_favorite_white_24dp);
+            return ContextCompat.getDrawable(context, R.drawable.ic_favorite_white_24dp);
         } else {
-            return animeFragment.getResources().getDrawable(R.drawable.ic_favorite_border_white_24dp);
+            return ContextCompat.getDrawable(context, R.drawable.ic_favorite_border_white_24dp);
         }
     }
 

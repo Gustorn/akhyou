@@ -28,10 +28,9 @@ public class AnimeRamAnimeProvider implements AnimeProvider {
             throw OnErrorThrowable.from(new Throwable("Failed to retrieve anime."));
         }
 
-        Anime anime = new Anime()
-                .setProviderType(Anime.ANIME_RAM)
-                .setUrl(url)
-                .setImageUrl(parseForImageUrl(animeBox));
+        Anime anime = null;//new Anime();
+//                .setUrl(url)
+//                .setImageUrl(parseForImageUrl(animeBox));
 
         anime = parseForInfo(infoAndEpisodes, anime);
 
@@ -42,7 +41,7 @@ public class AnimeRamAnimeProvider implements AnimeProvider {
 
     @Override
     public Anime updateCachedAnime(Anime cachedAnime) throws OnErrorThrowable {
-        Anime updatedAnime = fetchAnime(cachedAnime.getUrl());
+        Anime updatedAnime = null; //fetchAnime(cachedAnime.getUrl());
 
         updatedAnime.inheritWatchedFrom(cachedAnime.getEpisodes());
 
@@ -83,14 +82,15 @@ public class AnimeRamAnimeProvider implements AnimeProvider {
 
     private Anime parseForInfo (Elements infoAndEpisodes, Anime anime) {
         Elements infoElements = infoAndEpisodes.first().select("table > tbody > tr > td > table > tbody > tr > td.content1");
-
-        return anime
-                .setTitle(infoElements.get(0).text())
-                .setAlternateTitle(infoElements.get(1).text())
-                .setGenresString(infoElements.get(2).text())
-                .setDate(infoElements.get(4).text())
-                .setStatus(infoElements.get(5).text())
-                .setDesc(infoElements.last().text());
+        return null;
+//
+//        return anime
+//                .setTitle(infoElements.get(0).text())
+//                .setAlternateTitle(infoElements.get(1).text())
+//                .setGenresString(infoElements.get(2).text())
+//                .setDate(infoElements.get(4).text())
+//                .setStatus(infoElements.get(5).text())
+//                .setDesc(infoElements.last().text());
     }
 
     private List<Episode> parseForEpisodes (Elements infoAndEpisodes) {

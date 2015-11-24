@@ -52,6 +52,7 @@
 
     <string name="status_title">Status:</string>
     <string name="alternate_title_title">Alternate Title:</string>
-    <string name="date_title">Release Date:</string>
+    <string name="date_title">"Aired:"</string>
+    <string name="version_string">"Current version: %s"</string>
 
 </resources>

@@ -18,6 +18,11 @@ import org.jsoup.Jsoup;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import de.greenrobot.event.EventBus;
 import dulleh.akhyou.MainApplication;
@@ -28,6 +33,9 @@ import dulleh.akhyou.Utils.Events.SnackbarEvent;
 import rx.exceptions.OnErrorThrowable;
 
 public class GeneralUtils {
+    private static final DateFormat FROM_DATE = new SimpleDateFormat("yyyy-mm-dd", Locale.getDefault());
+    private static final DateFormat TO_DATE = new SimpleDateFormat("d MMM yyyy", Locale.getDefault());
+
     public static String getWebPage (final String url) {
         return GeneralUtils.getWebPage(new Request.Builder().url(url).build());
     }
@@ -112,17 +120,6 @@ public class GeneralUtils {
         return Jsoup.parse(body).select("div#player").first().nextElementSibling().html();
     }
 
-    public static String formattedGeneres (String[] genres) {
-        StringBuilder genresBuilder = new StringBuilder();
-        for (String genre : genres) {
-            genresBuilder.append(" ");
-            genresBuilder.append(genre);
-            genresBuilder.append(",");
-        }
-        genresBuilder.deleteCharAt(genresBuilder.length() - 1);
-        return genresBuilder.toString();
-    }
-
     // Need to handle null by yourself
     @Nullable
     public static String serializeAnime(Anime anime) {
@@ -150,18 +147,14 @@ public class GeneralUtils {
         return colorInt == MainApplication.RED_ACCENT_RGB;
     }
 
-    public static int determineProviderType (String url) throws Exception{
-        url = url.toUpperCase();
-        if (url.contains(Anime.ANIME_RUSH_TITLE)) {
-            return Anime.ANIME_RUSH;
-        } else if (url.contains(Anime.ANIME_RAM_TITLE)) {
-            return Anime.ANIME_RAM;
-        } else if (url.contains(Anime.ANIME_BAM_TITLE)) {
-            return Anime.ANIME_BAM;
-        }
-        throw new Exception("Unsupported source");
-    }
 
+    public static String formatHummingbirdDate(String date) {
+        try {
+            return TO_DATE.format(FROM_DATE.parse(date));
+        } catch (ParseException e) {
+            return date;
+        }
+    }
 
     public static SourceProvider determineSourceProvider (String lowerCaseTitle) {
         for (String sourceName : Source.sourceMap.keySet()) {
@@ -172,46 +165,4 @@ public class GeneralUtils {
         return null;
     }
 
-
-/*
-    public static void basicAsyncObservableVoid (BasicObservableable basicObservableable, String string) {
-
-        Observable.defer(new Func0<Observable<Boolean>>() {
-            @Override
-            public Observable<Boolean> call() {
-                return Observable.just(basicObservableable.execute(string));
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Boolean>() {
-                    @Override
-                    public void onNext(Boolean aBoolean) {
-
-                    }
-
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-                });
-
-    }
-*/
-
 }
-
-
-
-
-
-
-
-
-
-

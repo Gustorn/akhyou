@@ -28,7 +28,7 @@ public class MainModel {
     private SharedPreferences sharedPreferences;
     private HummingbirdApi hummingbirdApi;
     // The key is the anime url.
-    private HashMap<String, Anime> favouritesMap;
+    private HashMap<Integer, Anime> favouritesMap;
     private Anime lastAnime;
     public static boolean openToLastAnime = true;
 
@@ -51,7 +51,7 @@ public class MainModel {
         for (String favourite : favourites) {
             Anime anime = deserializeAnime(favourite);
             if (anime != null) {
-                favouritesMap.put(anime.getUrl(), anime);
+                favouritesMap.put(anime.getHummingbirdId(), anime);
             }
         }
     }
@@ -84,7 +84,7 @@ public class MainModel {
 
     public void setFavourites (ArrayList<Anime> favourites) {
         for (Anime favourite : favourites) {
-            favouritesMap.put(favourite.getUrl(), favourite);
+            favouritesMap.put(favourite.getHummingbirdId(), favourite);
         }
     }
 
@@ -112,12 +112,12 @@ public class MainModel {
         editor.apply();
     }
 
-    public boolean isInFavourites (String url)  throws IllegalStateException {
+    public boolean isInFavourites (int id)  throws IllegalStateException {
         if (favouritesMap == null && sharedPreferences != null) {
             refreshFavourites();
         }
         if (favouritesMap != null) {
-            return (favouritesMap.containsKey(url));
+            return (favouritesMap.containsKey(id));
         }
         throw new IllegalStateException("Can't find favourites.");
     }
@@ -126,20 +126,20 @@ public class MainModel {
         if (favouritesMap == null) {
             refreshFavourites();
         }
-        favouritesMap.put(anime.getUrl(), anime);
+        favouritesMap.put(anime.getHummingbirdId(), anime);
     }
 
     public void removeFromFavourites (Anime anime) {
         if (favouritesMap == null) {
             refreshFavourites();
         }
-        favouritesMap.remove(anime.getUrl());
+        favouritesMap.remove(anime.getHummingbirdId());
     }
 
     // Returns true if a favourite was updated. False if not.
     public boolean updateFavourite (Anime favourite) {
-        if (favouritesMap.keySet().contains(favourite.getUrl())) {
-            favouritesMap.put(favourite.getUrl(), favourite);
+        if (favouritesMap.containsKey(favourite.getHummingbirdId())) {
+            favouritesMap.put(favourite.getHummingbirdId(), favourite);
             return true;
         }
         return false;

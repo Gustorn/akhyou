@@ -60,16 +60,11 @@ public class SearchGridAdapter extends RecyclerView.Adapter<SearchGridAdapter.Vi
 
         viewHolder.titleView.setText(anime.getTitle());
 
-        viewHolder.view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                searchFragment.onCLick(getItem(position), null);
-            }
-        });
+        viewHolder.view.setOnClickListener(view -> searchFragment.onCLick(getItem(position), null));
     }
 
     private List<Anime> searchResults () {
-        return SearchHolderFragment.searchResultsCache.get(searchFragment.getPresenter().providerType);
+        return SearchHolderFragment.searchResultsCache;
     }
 
     private Anime getItem (int position) {

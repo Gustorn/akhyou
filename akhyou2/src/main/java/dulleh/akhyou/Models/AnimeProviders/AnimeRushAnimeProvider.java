@@ -33,26 +33,25 @@ public class AnimeRushAnimeProvider implements AnimeProvider {
             throw OnErrorThrowable.from(new Throwable("Failed to retrieve anime."));
         }
 
-        Anime anime = new Anime()
-                .setProviderType(Anime.ANIME_RUSH)
-                .setUrl(url);
+//        Anime anime = new Anime()
+//                .setUrl(url);
+//
+//        animeBox = animeBox.select("div.amin_box2").first();
+//        anime.setTitle(parseForTitle());
+//
+//        animeBox = animeBox.select("div.desc_box_mid").first();
+//        anime.setImageUrl(parseForImageUrl());
+//
+//        anime = parseForInformation(anime);
+//
+//        anime.setEpisodes(parseForEpisodes());
 
-        animeBox = animeBox.select("div.amin_box2").first();
-        anime.setTitle(parseForTitle());
-
-        animeBox = animeBox.select("div.desc_box_mid").first();
-        anime.setImageUrl(parseForImageUrl());
-
-        anime = parseForInformation(anime);
-
-        anime.setEpisodes(parseForEpisodes());
-
-        return anime;
+        return null;
     }
 
     @Override
     public Anime updateCachedAnime(Anime cachedAnime) throws OnErrorThrowable {
-        Anime updatedAnime = fetchAnime(cachedAnime.getUrl());
+        Anime updatedAnime = null; //fetchAnime(cachedAnime.getUrl());
 
         updatedAnime.inheritWatchedFrom(cachedAnime.getEpisodes());
 
@@ -123,20 +122,20 @@ public class AnimeRushAnimeProvider implements AnimeProvider {
         String catBoxDesc = element.getAllElements().text();
 
         String[] currentSplit = catBoxDesc.split("Status: ")[1].split("Alternative Titles: ");
-        anime.setStatus(currentSplit[0]);
-
-        currentSplit = currentSplit[1].split("Year: ");
-        anime.setAlternateTitle(currentSplit[0]);
-
-        currentSplit = currentSplit[1].split("Genres: ");
-        anime.setDate(currentSplit[0]);
-
-        currentSplit = currentSplit[1].split("Description: ");
-        anime.setDesc(currentSplit[1]);
-
-        String[] genres = currentSplit[0].split(", ");
-        anime.setGenres(genres);
-        anime.setGenresString(GeneralUtils.formattedGeneres(genres));
+//        anime.setStatus(currentSplit[0]);
+//
+//        currentSplit = currentSplit[1].split("Year: ");
+//        anime.setAlternateTitle(currentSplit[0]);
+//
+//        currentSplit = currentSplit[1].split("Genres: ");
+//        anime.setDate(currentSplit[0]);
+//
+//        currentSplit = currentSplit[1].split("Description: ");
+//        anime.setDesc(currentSplit[1]);
+//
+//        String[] genres = currentSplit[0].split(", ");
+//        anime.setGenres(genres);
+//        anime.setGenresString(GeneralUtils.formattedGeneres(genres));
 
         return anime;
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -50,102 +50,74 @@ public class SettingsFragment extends Fragment {
         if (savedInstanceState != null) {
             lastToolbarTitle = savedInstanceState.getString(lastToolbarTitleBundleKey);
         } else {
-            CharSequence title = ((MainActivity) getActivity()).getSupportActionBar().getTitle();
-            if (title != null) {
-                lastToolbarTitle = title.toString();
+            ActionBar supportActionBar = ((MainActivity)getActivity()).getSupportActionBar();
+            if (supportActionBar != null) {
+                CharSequence title = supportActionBar.getTitle();
+                if (title != null) {
+                    lastToolbarTitle = title.toString();
+                }
             }
         }
 
         RelativeLayout themeItem = (RelativeLayout) view.findViewById(R.id.theme_preference_item);
         TextView themeSummary = (TextView) themeItem.findViewById(R.id.preference_summary_text);
         themeSummary.setText(getSummary(THEME_PREFERENCE));
-        themeItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new MaterialDialog.Builder(getActivity())
-                        .title(R.string.theme_dialog_title)
-                        .items(themeTitles)
-                        .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
-                            @Override
-                            public boolean onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
+        themeItem.setOnClickListener(view1 ->
+            new MaterialDialog.Builder(getActivity())
+                .title(R.string.theme_dialog_title)
+                .items(themeTitles)
+                .itemsCallbackSingleChoice(-1, (materialDialog, view11, i, charSequence) -> {
+                    editor.putInt(THEME_PREFERENCE, i);
+                    editor.apply();
 
-                                editor.putInt(THEME_PREFERENCE, i);
-                                editor.apply();
-
-                                getActivity().recreate();
-                                return false;
-                            }
-                        })
-                        .show();
-            }
-        });
+                    getActivity().recreate();
+                    return false;
+                }).show());
 
         RelativeLayout searchGridItem = (RelativeLayout) view.findViewById(R.id.search_grid_preference_item);
         TextView searchGridSummary = (TextView) searchGridItem.findViewById(R.id.preference_summary_text);
         searchGridSummary.setText(getSummary(SEARCH_GRID_PREFERENCE));
-        searchGridItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new MaterialDialog.Builder(getActivity())
-                        .title(getString(R.string.search_grid_preference_title))
-                        .items(getResources().getStringArray(R.array.search_grid_options))
-                        .itemsCallbackSingleChoice(sharedPreferences.getInt(SEARCH_GRID_PREFERENCE, 0), new MaterialDialog.ListCallbackSingleChoice() {
-                            @Override
-                            public boolean onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
+        searchGridItem.setOnClickListener(view1 ->
+            new MaterialDialog.Builder(getActivity())
+                .title(getString(R.string.search_grid_preference_title))
+                .items(getResources().getStringArray(R.array.search_grid_options))
+                .itemsCallbackSingleChoice(sharedPreferences.getInt(SEARCH_GRID_PREFERENCE, 0), (materialDialog, view11, i, charSequence) -> {
+                    editor.putInt(SEARCH_GRID_PREFERENCE, i);
+                    editor.apply();
 
-                                editor.putInt(SEARCH_GRID_PREFERENCE, i);
-                                editor.apply();
-
-                                searchGridSummary.setText(searchGridSummaryUpdate(i) + " " + getString(R.string.requires_restart));
-
-                                return false;
-                            }
-                        })
-                        .show();
-            }
-        });
+                    searchGridSummary.setText(searchGridSummaryUpdate(i) + " " + getString(R.string.requires_restart));
+                    return false;
+                }).show());
 
         RelativeLayout openToLastAnimeItem = (RelativeLayout) view.findViewById(R.id.open_to_last_anime_preference_item);
         CheckBox openToLastAnimeCheckBox = (CheckBox) openToLastAnimeItem.findViewById(R.id.preference_check_box);
         TextView openToLastAnimeSummary = (TextView) openToLastAnimeItem.findViewById(R.id.preference_summary_text);
         openToLastAnimeSummary.setText(yesNoSummaryUpdate(MainModel.openToLastAnime));
         openToLastAnimeCheckBox.setChecked(MainModel.openToLastAnime);
-        openToLastAnimeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                MainModel.openToLastAnime = b;
+        openToLastAnimeCheckBox.setOnCheckedChangeListener((compoundButton, b) -> {
+            MainModel.openToLastAnime = b;
 
-                editor.putBoolean(MainModel.OPEN_TO_LAST_ANIME_PREF, b);
-                editor.apply();
-
-                openToLastAnimeSummary.setText(yesNoSummaryUpdate(b));
-            }
+            editor.putBoolean(MainModel.OPEN_TO_LAST_ANIME_PREF, b);
+            editor.apply();
+            openToLastAnimeSummary.setText(yesNoSummaryUpdate(b));
         });
 
         boolean shouldAutoUpdateVal = sharedPreferences.getBoolean(MainModel.AUTO_UPDATE_PREF, true);
         RelativeLayout autoUpdateItem = (RelativeLayout) view.findViewById(R.id.auto_update_preference_item);
         CheckBox autoUpdateCheckBox = (CheckBox) autoUpdateItem.findViewById(R.id.preference_check_box);
         ((TextView) autoUpdateItem.findViewById(R.id.preference_summary_text))
-                .setText("Current version: " + BuildConfig.VERSION_NAME);
+                .setText(String.format(getActivity().getApplicationContext().getString(R.string.version_string), BuildConfig.VERSION_NAME));
         autoUpdateCheckBox.setChecked(shouldAutoUpdateVal);
-        autoUpdateCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                editor.putBoolean(MainModel.AUTO_UPDATE_PREF, b);
-                editor.apply();
-            }
+        autoUpdateCheckBox.setOnCheckedChangeListener((compoundButton, b) -> {
+            editor.putBoolean(MainModel.AUTO_UPDATE_PREF, b);
+            editor.apply();
         });
 
         RelativeLayout licencesItem = (RelativeLayout) view.findViewById(R.id.licences_preference_item);
-        licencesItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new MaterialDialog.Builder(getActivity())
-                        .title(getString(R.string.licences_preference_summary))
-                        .content(R.string.licences)
-                        .show();
-            }
-        });
+        licencesItem.setOnClickListener(v -> new MaterialDialog.Builder(getActivity())
+                .title(getString(R.string.licences_preference_summary))
+                .content(R.string.licences)
+                .show());
 
         return view;
     }
@@ -181,8 +153,10 @@ public class SettingsFragment extends Fragment {
     }
 
     public void setToolbarTitle (String title) {
-        //((MainActivity) getActivity()).setToolbarTitle(title);
-        ((MainActivity) getActivity()).getSupportActionBar().setTitle(title);
+        ActionBar supportBar = ((MainActivity)getActivity()).getSupportActionBar();
+        if (supportBar != null) {
+            supportBar.setTitle(title);
+        }
     }
 
     private String getSummary (String key) {

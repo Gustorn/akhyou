@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
@@ -27,16 +26,7 @@ import dulleh.akhyou.Utils.Events.SearchEvent;
 
 public class SearchHolderFragment extends Fragment{
     public static int SEARCH_GRID_TYPE = 0;
-    public static List<List<Anime>> searchResultsCache = new ArrayList<>(1);
-
-    public SearchHolderFragment () {
-        if (searchResultsCache.isEmpty()) {
-            searchResultsCache.add(Anime.ANIME_RUSH, new ArrayList<>(0));
-            searchResultsCache.add(Anime.ANIME_RAM, new ArrayList<>(0));
-            searchResultsCache.add(Anime.ANIME_BAM, new ArrayList<>(0));
-            searchResultsCache.add(Anime.ANIME_KISS, new ArrayList<>(0));
-        }
-    }
+    public static List<Anime> searchResultsCache = new ArrayList<>(1);
 
     ViewPager searchPager;
 
@@ -56,13 +46,7 @@ public class SearchHolderFragment extends Fragment{
         View view = inflater.inflate(R.layout.search_holder_fragment, container, false);
 
         searchPager = (ViewPager) view.findViewById(R.id.search_view_pager);
-        TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabs);
-
-        SearchHolderAdapter searchHolderAdapter = new SearchHolderAdapter(getChildFragmentManager());
-
-        searchPager.setAdapter(searchHolderAdapter);
-        tabLayout.setupWithViewPager(searchPager);
-
+        searchPager.setAdapter(new SearchHolderAdapter(getChildFragmentManager()));
         return view;
     }
 

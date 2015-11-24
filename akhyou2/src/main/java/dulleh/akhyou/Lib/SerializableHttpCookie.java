@@ -18,7 +18,7 @@ package dulleh.akhyou.Lib;
  */
 
 /**
- * Based on the code from this stackoverflow answer http://stackoverflow.com/a/25462286/980387 by janoliver
+ * Based on the code from this StackOverflow answer http://stackoverflow.com/a/25462286/980387 by janoliver
  * Modifications in the structure of the class and addition of serialization of httpOnly attribute
  */
 
@@ -34,8 +34,7 @@ import java.lang.reflect.Field;
 import java.net.HttpCookie;
 
 public class SerializableHttpCookie implements Serializable {
-    private static final String TAG = SerializableHttpCookie.class
-            .getSimpleName();
+    private static final String TAG = SerializableHttpCookie.class.getSimpleName();
 
     private static final long serialVersionUID = 6374381323722046732L;
 
@@ -66,12 +65,10 @@ public class SerializableHttpCookie implements Serializable {
 
     public HttpCookie decode(String encodedCookie) {
         byte[] bytes = hexStringToByteArray(encodedCookie);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
-                bytes);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         HttpCookie cookie = null;
         try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(
-                    byteArrayInputStream);
+            ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
             cookie = ((SerializableHttpCookie) objectInputStream.readObject()).cookie;
         } catch (IOException e) {
             Log.d(TAG, "IOException in decodeCookie", e);
@@ -88,8 +85,6 @@ public class SerializableHttpCookie implements Serializable {
             initFieldHttpOnly();
             return (boolean) fieldHttpOnly.get(cookie);
         } catch (Exception e) {
-            // NoSuchFieldException || IllegalAccessException ||
-            // IllegalArgumentException
             Log.w(TAG, e);
         }
         return false;
@@ -101,8 +96,6 @@ public class SerializableHttpCookie implements Serializable {
             initFieldHttpOnly();
             fieldHttpOnly.set(cookie, httpOnly);
         } catch (Exception e) {
-            // NoSuchFieldException || IllegalAccessException ||
-            // IllegalArgumentException
             Log.w(TAG, e);
         }
     }

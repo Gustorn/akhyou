@@ -54,7 +54,7 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
     public void onBindViewHolder(final ViewHolder viewHolder, int position) {
         Anime anime = getItem(position);
         viewHolder.titleView.setText(anime.getTitle());
-        viewHolder.descView.setText(anime.getDesc());
+        viewHolder.descView.setText(anime.getSynopsis());
 
         Picasso.with(context)
                 .load(anime.getImageUrl())
@@ -63,17 +63,12 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
                 .centerCrop()
                 .into(viewHolder.imageView);
 
-        viewHolder.relativeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                searchFragment.onCLick(getItem(position), null);
-            }
-        });
+        viewHolder.relativeLayout.setOnClickListener(view -> searchFragment.onCLick(getItem(position), null));
 
     }
 
     private List<Anime> searchResults () {
-        return SearchHolderFragment.searchResultsCache.get(searchFragment.getPresenter().providerType);
+        return SearchHolderFragment.searchResultsCache;
     }
 
     private Anime getItem (int position) {

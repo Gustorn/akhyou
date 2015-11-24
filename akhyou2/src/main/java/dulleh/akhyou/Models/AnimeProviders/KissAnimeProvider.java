@@ -38,9 +38,9 @@ public class KissAnimeProvider implements AnimeProvider {
     public Anime fetchAnime(String url) throws OnErrorThrowable {
         String body = GeneralUtils.getWebPage(url);
         Document doc = Jsoup.parse(body);
-        Anime anime = new Anime()
-                .setUrl(url)
-                .setProviderType(Anime.ANIME_KISS);
+//        Anime anime = new Anime()
+//                .setUrl(url);
+        Anime anime = null;
         anime = parseInfo(doc, anime);
         anime.setEpisodes(parseEpisodes(doc));
         return anime;
@@ -48,7 +48,7 @@ public class KissAnimeProvider implements AnimeProvider {
 
     @Override
     public Anime updateCachedAnime(Anime cachedAnime) throws OnErrorThrowable {
-        Anime updatedAnime = fetchAnime(cachedAnime.getUrl());
+        Anime updatedAnime = null; //fetchAnime(cachedAnime.getUrl());
         updatedAnime.inheritWatchedFrom(cachedAnime.getEpisodes());
         updatedAnime.setMajorColour(cachedAnime.getMajorColour());
         return updatedAnime;
@@ -99,29 +99,29 @@ public class KissAnimeProvider implements AnimeProvider {
         Element date = info.select("p:contains(Date)").first();
         if (date != null) {
             String text = date.text();
-            anime.setDate(text.substring(text.indexOf(':') + 2));
+            //anime.setDate(text.substring(text.indexOf(':') + 2));
         } else {
-            anime.setDate("-");
+            //anime.setDate("-");
         }
 
         Element status = info.select("p:contains(Status)").first();
         if (status != null) {
             Matcher statusMatcher = EXTRACT_STATUS.matcher(status.text());
             if (statusMatcher.find()) {
-                anime.setStatus(statusMatcher.group(1));
+                //anime.setStatus(statusMatcher.group(1));
             } else {
-                anime.setStatus("-");
+                //anime.setStatus("-");
             }
         } else {
-            anime.setStatus("-");
+            //anime.setStatus("-");
         }
 
-        anime.setTitle(title)
-             .setAlternateTitle(altNames)
-             .setGenres(genres.toArray(new String[genres.size()]))
-             .setGenresString(genreString)
-             .setDesc(info.last().text())
-             .setImageUrl(image);
+//        anime.setTitle(title)
+//             .setAlternateTitle(altNames)
+//             .setGenres(genres.toArray(new String[genres.size()]))
+//             .setGenresString(genreString)
+//             .setDesc(info.last().text())
+//             .setImageUrl(image);
 
         return anime;
     }

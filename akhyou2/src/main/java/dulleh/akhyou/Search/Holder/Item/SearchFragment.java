@@ -22,7 +22,6 @@ import dulleh.akhyou.MainActivity;
 import dulleh.akhyou.MainApplication;
 import dulleh.akhyou.Models.Anime;
 import dulleh.akhyou.R;
-import dulleh.akhyou.Search.Holder.SearchHolderAdapter;
 import dulleh.akhyou.Search.Holder.SearchHolderFragment;
 import dulleh.akhyou.Utils.AdapterClickListener;
 import dulleh.akhyou.Utils.Events.OpenAnimeEvent;
@@ -34,13 +33,6 @@ import nucleus.view.NucleusSupportFragment;
 public class SearchFragment extends NucleusSupportFragment<SearchPresenter> implements AdapterClickListener<Anime> {
     private SwipeRefreshLayout refreshLayout;
     private RecyclerView.Adapter searchAdapter;
-
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        // must be after ^ so that getPresenter() doesn't return null
-        getPresenter().setProviderType(getArguments().getInt(SearchHolderAdapter.PROVIDER_TYPE_KEY, Anime.ANIME_RUSH));
-    }
 
     @Nullable
     @Override
@@ -64,12 +56,7 @@ public class SearchFragment extends NucleusSupportFragment<SearchPresenter> impl
 
         refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
         refreshLayout.setColorSchemeResources(R.color.accent);
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getPresenter().search();
-            }
-        });
+        refreshLayout.setOnRefreshListener(() -> getPresenter().search());
 
         updateRefreshing();
 

@@ -10,10 +10,6 @@ import android.support.v7.graphics.Palette;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import dulleh.akhyou.Models.AnimeProviders.AnimeBamAnimeProvider;
-import dulleh.akhyou.Models.AnimeProviders.KissAnimeProvider;
-import dulleh.akhyou.Models.AnimeProviders.AnimeRamAnimeProvider;
-import dulleh.akhyou.Models.AnimeProviders.AnimeRushAnimeProvider;
 import dulleh.akhyou.Models.AnimeProviders.AnimeProvider;
 import dulleh.akhyou.Models.Anime;
 import dulleh.akhyou.Models.Source;
@@ -28,7 +24,6 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 
 public class AnimePresenter extends RxPresenter<AnimeFragment>{
@@ -62,7 +57,7 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
 
         view.updateRefreshing();
 
-        if (lastAnime != null && lastAnime.getUrl() != null) {
+        if (lastAnime != null) { //&& lastAnime.getUrl() != null) {
 
             if (lastAnime.getEpisodes() != null) {
                 view.setAnime(lastAnime);
@@ -95,7 +90,7 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
         unsubscribe();
     }
 
-    private void unsubscribe () {
+    private void unsubscribe() {
         if (animeSubscription != null && !animeSubscription.isUnsubscribed()) {
             animeSubscription.unsubscribe();
         }
@@ -107,49 +102,12 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
         }
     }
 
-    private Anime setAnimeProvider (Anime anime) {
-        if (anime.getProviderType() != null) {
-            switch (anime.getProviderType()) {
-                case Anime.ANIME_RUSH:
-                    animeProvider = new AnimeRushAnimeProvider();
-                    break;
-                case Anime.ANIME_RAM:
-                    animeProvider = new AnimeRamAnimeProvider();
-                    break;
-                case Anime.ANIME_BAM:
-                    animeProvider = new AnimeBamAnimeProvider();
-                    break;
-                case Anime.ANIME_KISS:
-                    animeProvider = new KissAnimeProvider();
-                    break;
-                default:
-                    try {
-                        anime.setProviderType(GeneralUtils.determineProviderType(anime.getUrl()));
-                        setAnimeProvider(anime);
-                    } catch (Exception e) {
-                        postError(e);
-                    }
-                    break;
-            }
-        } else {
-            try {
-                anime.setProviderType(GeneralUtils.determineProviderType(anime.getUrl()));
-                setAnimeProvider(anime);
-            } catch (Exception e) {
-                postError(e);
-            }
-        }
-        return anime;
-    }
-
-    public void onEvent (OpenAnimeEvent event) {
-        if (lastAnime == null || !event.anime.getProviderType().equals(lastAnime.getProviderType())) {
-            lastAnime = setAnimeProvider(event.anime);
-        } else {
+    public void onEvent(OpenAnimeEvent event) {
+        if (lastAnime == null) {
             lastAnime = event.anime;
         }
 
-        if (lastAnime != null && lastAnime.getEpisodes() != null) {
+        if (lastAnime.getEpisodes() != null) {
             getView().setAnime(lastAnime);
             fetchAnime(true);
         } else {
@@ -157,7 +115,7 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
         }
     }
 
-    public void fetchAnime (boolean updateCached) {
+    public void fetchAnime(boolean updateCached) {
         isRefreshing = true;
         if (getView() != null) {
             getView().updateRefreshing();
@@ -167,50 +125,39 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
             animeSubscription.unsubscribe();
         }
 
-        animeSubscription = Observable.defer(new Func0<Observable<Anime>>() {
-            @Override
-            public Observable<Anime> call() {
-                if (updateCached) {
-                    return Observable.just(animeProvider.updateCachedAnime(lastAnime));
+        animeSubscription = Observable
+            .defer(() -> updateCached ? Observable.just(animeProvider.updateCachedAnime(lastAnime)) : null)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(this.deliverLatestCache())
+            .subscribe(new Subscriber<Anime>() {
+                @Override
+                public void onNext(Anime anime) {
+                    lastAnime = anime;
+                    isRefreshing = false;
+                    getView().setAnime(lastAnime);
+                    //EventBus.getDefault().post(new LastAnimeEvent(lastAnime)); would save it without a major colour
+                    this.unsubscribe();
                 }
-                return Observable.just(animeProvider.fetchAnime(lastAnime.getUrl()));
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .compose(this.deliverLatestCache())
-                .subscribe(new Subscriber<Anime>() {
-                    @Override
-                    public void onNext(Anime anime) {
-                        // for AnimeBam which doesn't have alt-title on anime page
-                        if (lastAnime.getUrl().equals(anime.getUrl()) && lastAnime.getAlternateTitle() != null && anime.getAlternateTitle() == null) {
-                            anime.setAlternateTitle(lastAnime.getAlternateTitle());
-                        }
-                        lastAnime = anime;
-                        isRefreshing = false;
-                        getView().setAnime(lastAnime);
-                        //EventBus.getDefault().post(new LastAnimeEvent(lastAnime)); would save it without a major colour
-                        this.unsubscribe();
-                    }
 
-                    @Override
-                    public void onCompleted() {
-                        // should be using Observable.just() as onCompleted is never called
-                        // and it only runs once.
-                    }
+                @Override
+                public void onCompleted() {
+                    // should be using Observable.just() as onCompleted is never called
+                    // and it only runs once.
+                }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        isRefreshing = false;
-                        getView().updateRefreshing();
-                        postError(e);
-                        this.unsubscribe();
-                    }
+                @Override
+                public void onError(Throwable e) {
+                    isRefreshing = false;
+                    getView().updateRefreshing();
+                    postError(e);
+                    this.unsubscribe();
+                }
 
-                });
+            });
     }
 
-    public void setNeedToGiveFavourite (boolean bool) {
+    public void setNeedToGiveFavourite(boolean bool) {
         needToGiveFavouriteState = bool;
     }
 
@@ -233,7 +180,6 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
     public void downloadOrStream (Video video, boolean download) {
         if (download) {
             GeneralUtils.internalDownload((DownloadManager) getView().getActivity().getSystemService(Context.DOWNLOAD_SERVICE), video.getUrl());
-            //GeneralUtils.lazyDownload((AppCompatActivity) getView().getActivity(), video.getUrl());
         } else {
             postIntent(video.getUrl());
         }
@@ -259,35 +205,31 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
             }
         }
         
-        episodeSubscription = Observable.defer(new Func0<Observable<List<Source>>>() {
-            @Override
-            public Observable<List<Source>> call() {
-                return Observable.just(animeProvider.fetchSources(url));
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .compose(this.deliver())
-                .subscribe(new Subscriber<List<Source>>() {
-                    @Override
-                    public void onNext(List<Source> sources) {
-                        getView().showSourcesDialog(sources);
-                        episodeSubscription.unsubscribe();
-                    }
+        episodeSubscription = Observable
+            .defer(() -> Observable.just(animeProvider.fetchSources(url)))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(this.deliver())
+            .subscribe(new Subscriber<List<Source>>() {
+                @Override
+                public void onNext(List<Source> sources) {
+                    getView().showSourcesDialog(sources);
+                    episodeSubscription.unsubscribe();
+                }
 
-                    @Override
-                    public void onCompleted() {
-                        // should be using Observable.just() as onCompleted is never called
-                        // and it only runs once.
-                    }
+                @Override
+                public void onCompleted() {
+                    // should be using Observable.just() as onCompleted is never called
+                    // and it only runs once.
+                }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        postError(e);
-                        this.unsubscribe();
-                    }
+                @Override
+                public void onError(Throwable e) {
+                    postError(e);
+                    this.unsubscribe();
+                }
 
-                });
+            });
     }
 
     public void fetchVideo (Source source, boolean download) {
@@ -297,36 +239,31 @@ public class AnimePresenter extends RxPresenter<AnimeFragment>{
             }
         }
 
-        videoSubscription = Observable.defer(new Func0<Observable<Source>>() {
-            @Override
-            public Observable<Source> call() {
-                return Observable.just(animeProvider.fetchVideo(source));
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .compose(this.deliver())
-                // this subscriber stays here because it needs the 'lazyDownload'
-                .subscribe(new Subscriber<Source>() {
-                    @Override
-                    public void onNext(Source source) {
-                        getView().shareVideo(source, download);
-                        this.unsubscribe();
-                    }
+        videoSubscription = Observable
+            .defer(() -> Observable.just(animeProvider.fetchVideo(source)))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(this.deliver())
+            // this subscriber stays here because it needs the 'lazyDownload'
+            .subscribe(new Subscriber<Source>() {
+                @Override
+                public void onNext(Source source) {
+                    getView().shareVideo(source, download);
+                    this.unsubscribe();
+                }
 
-                    @Override
-                    public void onCompleted() {
-                        // should be using Observable.just() as onCompleted is never called
-                        // and it only runs once.
-                    }
+                @Override
+                public void onCompleted() {
+                    // should be using Observable.just() as onCompleted is never called
+                    // and it only runs once.
+                }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        postError(e);
-                        this.unsubscribe();
-                    }
-
-                });
+                @Override
+                public void onError(Throwable e) {
+                    postError(e);
+                    this.unsubscribe();
+                }
+            });
     }
 
     public void postError (Throwable e) {
