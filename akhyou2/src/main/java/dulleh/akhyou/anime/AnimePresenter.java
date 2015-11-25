@@ -3,7 +3,6 @@ package dulleh.akhyou.anime;
 import android.support.v7.graphics.Palette;
 
 import de.greenrobot.event.EventBus;
-import dulleh.akhyou.event.FavoriteEvent;
 import dulleh.akhyou.event.OpenAnimeEvent;
 import dulleh.akhyou.event.SnackbarEvent;
 import dulleh.akhyou.util.GeneralUtils;
@@ -40,11 +39,6 @@ public class AnimePresenter extends RxPresenter<AnimeFragment> {
                 anime.setMajorColour(palette.getDarkMutedSwatch().getRgb());
             }
         }
-    }
-
-    public void onFavouriteCheckedChanged(boolean b) {
-        FavoriteEvent.Action action = b ? FavoriteEvent.Action.ADD : FavoriteEvent.Action.REMOVE;
-        EventBus.getDefault().post(new FavoriteEvent(action, anime));
     }
 
     public void onEvent(OpenAnimeEvent event) {

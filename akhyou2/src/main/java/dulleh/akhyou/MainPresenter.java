@@ -34,30 +34,35 @@ public class MainPresenter extends RxPresenter<MainActivity> {
         mainModel = null;
     }
 
-    public Anime getLastAnime() {
-        return mainModel.getLastAnime();
-    }
-
-    public MainModel getModel () {
-        return mainModel;
-    }
-
-    public List<Anime> getFavourites () {
+    public List<Anime> getFavourites() {
         return mainModel.getFavorites();
+    }
+
+    public MainModel getModel() {
+        return mainModel;
     }
 
     public void onFreshStart(MainActivity mainActivity) {
         mainActivity.requestFragment(MainActivity.SEARCH_FRAGMENT);
     }
 
-    public void onEvent (FavoriteEvent event) {
-        // colors are inconsistent for whatever reason, causing duplicate favourites,
-        // so Set is pretty useless ;-;
+    public void onEvent(FavoriteEvent event) {
+        boolean isFavorite = mainModel.isFavorite(event.anime);
         try {
-            if (event.action == FavoriteEvent.Action.ADD) {
-                mainModel.addFavorite(event.anime);
-            } else {
-                mainModel.removeFavorite(event.anime);
+            switch (event.action) {
+                case ADD:
+                    mainModel.addFavorite(event.anime);
+                    break;
+                case REMOVE:
+                    mainModel.removeFavorite(event.anime);
+                    break;
+                case TOGGLE:
+                    if (isFavorite)
+                        mainModel.removeFavorite(event.anime);
+                    else
+                        mainModel.addFavorite(event.anime);
+                    break;
+
             }
             if (getView() != null) {
                 getView().favoritesChanged();
@@ -67,7 +72,7 @@ public class MainPresenter extends RxPresenter<MainActivity> {
         }
     }
 
-    public void onEvent (SearchSubmittedEvent event) {
+    public void onEvent(SearchSubmittedEvent event) {
         if (getView() != null) {
             if (getView().getSupportFragmentManager().findFragmentByTag(MainActivity.ANIME_FRAGMENT) != null) {
                 getView().getSupportFragmentManager().popBackStack();
@@ -80,10 +85,10 @@ public class MainPresenter extends RxPresenter<MainActivity> {
     }
 
     public void onEvent(OpenAnimeEvent event) {
-        mainModel.lastAnime = event.anime;
+        mainModel.updateLastAnime(event.anime);
     }
 
-    public void onEvent (SnackbarEvent event) {
+    public void onEvent(SnackbarEvent event) {
         getView().showSnackBar(event);
     }
 

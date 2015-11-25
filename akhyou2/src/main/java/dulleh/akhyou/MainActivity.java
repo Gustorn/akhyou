@@ -62,15 +62,14 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
         favouritesList = (RecyclerView) findViewById(R.id.drawer_recycler_view);
         favouritesList.setLayoutManager(new LinearLayoutManager(this));
 
-        // getPresenter().refreshFavouritesList();
-        // setFavoritesAdapter();
+        setFavoritesAdapter();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //toolbar.setContentInsetsRelative(0, 0);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         // must be after set as actionbar
         toolbar.setNavigationOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
 
@@ -176,7 +175,7 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
                 break;
 
             case ANIME_FRAGMENT:
-                fragmentTransaction.setCustomAnimations(R.anim.enter_right, 0, 0, R.anim.exit_right)
+                fragmentTransaction.setCustomAnimations(R.anim.enter_down, 0, 0, R.anim.exit_down)
                         .replace(R.id.container, new AnimeFragment(), ANIME_FRAGMENT);
 
                 if (fragmentManager.findFragmentByTag(SEARCH_FRAGMENT) != null) {

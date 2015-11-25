@@ -18,6 +18,8 @@ import com.squareup.picasso.Picasso;
 import dulleh.akhyou.MainActivity;
 import dulleh.akhyou.MainApplication;
 import dulleh.akhyou.R;
+import dulleh.akhyou.event.FavoriteAction;
+import dulleh.akhyou.event.FavoriteEvent;
 import dulleh.akhyou.util.PaletteTransform;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusSupportFragment;
@@ -75,18 +77,13 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> {
         alternateTitle.setText(anime.getAlternateTitle());
         date.setText(anime.getAiringString());
         status.setText(anime.getStatus());
-        favoriteButton.setImageDrawable(favoriteIcon());
+        favoriteButton.setImageDrawable(favoriteIcon(anime));
         setToolbarTitle(anime.getTitle());
-    }
 
-    // returns false if it cannot check.
-    public boolean isInFavourites(Anime anime) {
-        try {
-            return ((MainActivity) getActivity()).getPresenter().getModel().isFavorite(anime);
-        } catch (IllegalStateException e) {
-            getPresenter().postError(e);
-            return false;
-        }
+        favoriteButton.setOnClickListener(e -> {
+            toggleFavorite(anime);
+            favoriteButton.setImageDrawable(favoriteIcon(anime));
+        });
     }
 
     public void setToolbarTitle(String title) {
@@ -96,9 +93,23 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> {
         }
     }
 
+    private void toggleFavorite(Anime anime) {
+        ((MainActivity) getActivity())
+            .getPresenter()
+            .onEvent(new FavoriteEvent(FavoriteAction.TOGGLE, anime));
+    }
 
-    private Drawable favoriteIcon() {
-        if (true) {
+    private boolean isFavorite(Anime anime) {
+        try {
+            return ((MainActivity) getActivity()).getPresenter().getModel().isFavorite(anime);
+        } catch (IllegalStateException e) {
+            getPresenter().postError(e);
+            return false;
+        }
+    }
+
+    private Drawable favoriteIcon(Anime anime) {
+        if (isFavorite(anime)) {
             return ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_white_24dp);
         } else {
             return ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_border_white_24dp);
