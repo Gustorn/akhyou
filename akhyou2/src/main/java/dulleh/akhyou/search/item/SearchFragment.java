@@ -2,11 +2,13 @@ package dulleh.akhyou.search.item;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +30,7 @@ import nucleus.view.NucleusSupportFragment;
 @RequiresPresenter(SearchPresenter.class)
 public class SearchFragment extends NucleusSupportFragment<SearchPresenter> implements AdapterClickListener<Anime> {
     private RecyclerView.Adapter searchAdapter;
+    private SwipeRefreshLayout refreshLayout;
 
     @Nullable
     @Override
@@ -48,8 +51,9 @@ public class SearchFragment extends NucleusSupportFragment<SearchPresenter> impl
         }
         searchResultsView.setAdapter(searchAdapter);
         searchResultsView.setItemAnimator(new DefaultItemAnimator());
-
-        updateRefreshing();
+        refreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.refresh_layout);
+        refreshLayout.setColorSchemeResources(R.color.accent);
+        refreshLayout.setOnRefreshListener(() -> refreshLayout.setRefreshing(false));
 
         return view;
     }
@@ -95,20 +99,20 @@ public class SearchFragment extends NucleusSupportFragment<SearchPresenter> impl
         searchView.clearFocus();
     }
 
-    public void updateSearchResults () {
+    public void updateSearchResults() {
         searchAdapter.notifyDataSetChanged();
-        updateRefreshing();
     }
 
-    public void updateRefreshing () {
-//        if (!isRefreshing() && getPresenter().isRefreshing) {
-//            TypedValue typedValue = new TypedValue();
-//            getActivity().getTheme().resolveAttribute(android.support.v7.appcompat.R.attr.actionBarSize, typedValue, true);
-//            refreshLayout.setProgressViewOffset(false, 0, getResources().getDimensionPixelSize(typedValue.resourceId));
-//            refreshLayout.setRefreshing(true);
-//        } else if (isRefreshing() && !getPresenter().isRefreshing){
-//            refreshLayout.setRefreshing(false);
-//        }
+    public void startLoading() {
+        TypedValue typedValue = new TypedValue();
+        getActivity().getTheme().resolveAttribute(android.support.v7.appcompat.R.attr.actionBarSize, typedValue, true);
+        refreshLayout.setProgressViewOffset(false, 0, getResources().getDimensionPixelSize(typedValue.resourceId));
+        refreshLayout.setRefreshing(true);
+    }
+
+    public void finishLoading() {
+        refreshLayout.setRefreshing(false);
+        searchAdapter.notifyDataSetChanged();
     }
 
     @Override

@@ -20,6 +20,7 @@ import dulleh.akhyou.event.OpenAnimeEvent;
 import dulleh.akhyou.event.SnackbarEvent;
 import dulleh.akhyou.search.SearchHolderFragment;
 import dulleh.akhyou.anime.Anime;
+import dulleh.akhyou.settings.SettingsFragment;
 import dulleh.akhyou.util.AdapterClickListener;
 import dulleh.akhyou.network.CloudflareHttpClient;
 import nucleus.factory.PresenterFactory;
@@ -93,76 +94,7 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
     private void setTheme () {
         sharedPreferences = getPreferences(MODE_PRIVATE);
         int themePref = sharedPreferences.getInt(getApplicationContext().getString(R.string.akhyou_red_theme), 0);
-
-        switch (themePref) {
-            case 1:
-                setTheme(R.style.PinkTheme);
-                break;
-
-            case 2:
-                setTheme(R.style.PurpleTheme);
-                break;
-
-            case 3:
-                setTheme(R.style.DeepPurpleTheme);
-                break;
-
-            case 4:
-                setTheme(R.style.IndigoTheme);
-                break;
-
-            case 5:
-                setTheme(R.style.LightBlueTheme);
-                break;
-
-            case 6:
-                setTheme(R.style.CyanTheme);
-                break;
-
-            case 7:
-                setTheme(R.style.TealTheme);
-                break;
-
-            case 8:
-                setTheme(R.style.GreenTheme);
-                break;
-
-            case 9:
-                setTheme(R.style.LightGreenTheme);
-                break;
-
-            case 10:
-                setTheme(R.style.LimeTheme);
-                break;
-
-            case 11:
-                setTheme(R.style.YellowTheme);
-                break;
-
-            case 12:
-                setTheme(R.style.OrangeTheme);
-                break;
-
-            case 13:
-                setTheme(R.style.DeepOrangeTheme);
-                break;
-
-            case 14:
-                setTheme(R.style.BrownTheme);
-                break;
-
-            case 15:
-                setTheme(R.style.GreyTheme);
-                break;
-
-            case 16:
-                setTheme(R.style.BlueGreyTheme);
-                break;
-
-            default:
-                setTheme(R.style.AkhyouRedTheme);
-                break;
-        }
+        setTheme(themePref);
     }
 
     public void requestFragment (String tag) {
@@ -183,21 +115,18 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
                 }
 
                 break;
-//
-//            case SETTINGS_FRAGMENT:
-//                fragmentTransaction
-//                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-//                        .replace(R.id.container, new SettingsFragment(), SETTINGS_FRAGMENT);
-//
-//                if (fragmentManager.findFragmentByTag(ANIME_FRAGMENT) != null) {
-//                    fragmentTransaction
-//                            .addToBackStack(ANIME_FRAGMENT);
-//                } else { // only other situation settings could have been opened in
-//                    fragmentTransaction
-//                            .addToBackStack(SEARCH_FRAGMENT);
-//                }
-//
-//                break;
+
+            case SETTINGS_FRAGMENT:
+                fragmentTransaction
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .replace(R.id.container, new SettingsFragment(), SETTINGS_FRAGMENT);
+                if (fragmentManager.findFragmentByTag(ANIME_FRAGMENT) != null) {
+                    fragmentTransaction.addToBackStack(ANIME_FRAGMENT);
+                } else {
+                    fragmentTransaction.addToBackStack(SEARCH_FRAGMENT);
+                }
+
+                break;
         }
         fragmentTransaction.commit();
     }
@@ -222,14 +151,14 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
         } else {
             EventBus.getDefault().postSticky(new OpenAnimeEvent(item));
         }
-//
-//        if (fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) != null) {
-//            fragmentManager
-//                    .beginTransaction()
-//                    .remove(fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT))
-//                    .commit();
-//            fragmentManager.popBackStack();
-//        }
+
+        if (fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) != null) {
+            fragmentManager
+                    .beginTransaction()
+                    .remove(fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT))
+                    .commit();
+            fragmentManager.popBackStack();
+        }
 
         closeDrawer();
     }

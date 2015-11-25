@@ -25,7 +25,6 @@ public class SearchPresenter extends RxPresenter<SearchFragment> {
     private SearchProvider searchProvider;
 
     private String searchTerm;
-    public boolean isRefreshing;
 
     @Override
     protected void onCreate(Bundle savedState) {
@@ -37,7 +36,6 @@ public class SearchPresenter extends RxPresenter<SearchFragment> {
     protected void onTakeView(SearchFragment view) {
         super.onTakeView(view);
         subscribe();
-        view.updateRefreshing();
     }
 
     @Override
@@ -62,6 +60,7 @@ public class SearchPresenter extends RxPresenter<SearchFragment> {
 
     public void onEvent (SearchEvent event) {
         this.searchTerm = event.searchTerm;
+        getView().startLoading();
         search();
     }
 
@@ -77,22 +76,19 @@ public class SearchPresenter extends RxPresenter<SearchFragment> {
             .compose(this.deliver())
             .subscribe(new Subscriber<List<Anime>>() {
                 @Override
-                public void onNext(List<Anime> animes) {
-                    SearchHolderFragment.setSearchResults(animes);
-                    isRefreshing = false;
-                    getView().updateSearchResults();
+                public void onNext(List<Anime> results) {
+                    SearchHolderFragment.setSearchResults(results);
+                    getView().finishLoading();
                     this.unsubscribe();
                 }
 
                 @Override
                 public void onCompleted() {
-                    // should be using Observable.just() as onCompleted is never called
-                    // and it only runs once.
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    isRefreshing = false;
+                    getView().finishLoading();
                     SearchHolderFragment.setSearchResults(new ArrayList<>(0));
                     getView().updateSearchResults();
                     postError(e);

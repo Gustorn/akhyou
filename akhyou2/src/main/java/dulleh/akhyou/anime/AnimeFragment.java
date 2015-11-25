@@ -3,10 +3,16 @@ package dulleh.akhyou.anime;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -15,30 +21,42 @@ import android.widget.TextView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import de.greenrobot.event.EventBus;
 import dulleh.akhyou.MainActivity;
 import dulleh.akhyou.MainApplication;
 import dulleh.akhyou.R;
 import dulleh.akhyou.event.FavoriteAction;
 import dulleh.akhyou.event.FavoriteEvent;
+import dulleh.akhyou.event.SearchSubmittedEvent;
 import dulleh.akhyou.util.PaletteTransform;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusSupportFragment;
 
 @RequiresPresenter(AnimePresenter.class)
 public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> {
-    ImageView coverImage;
-    TextView synopsis;
-    TextView genres;
-    TextView alternateTitle;
-    TextView date;
-    TextView status;
-    FloatingActionButton favoriteButton;
+    private ImageView coverImage;
+    private TextView synopsis;
+    private TextView genres;
+    private TextView alternateTitle;
+    private TextView date;
+    private TextView status;
+    private FloatingActionButton favoriteButton;
+
+    private SearchView searchView;
+    private CoordinatorLayout animeDetails;
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setHasOptionsMenu(true);
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.anime_header, container, false);
 
+        animeDetails = (CoordinatorLayout) view.findViewById(R.id.anime_details);
         coverImage = (ImageView) view.findViewById(R.id.anime_image_view);
         synopsis = (TextView) view.findViewById(R.id.anime_desc_view);
         genres = (TextView) view.findViewById(R.id.anime_genres_view);
@@ -54,7 +72,48 @@ public class AnimeFragment extends NucleusSupportFragment<AnimePresenter> {
     public void onDestroy() {
         super.onDestroy();
         setToolbarTitle(null);
+        if (searchView != null) {
+            searchView.setOnQueryTextListener(null);
+        }
         MainApplication.getRefWatcher(getActivity()).watch(this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (getView() != null) {
+            super.onCreateOptionsMenu(menu, inflater);
+
+            MenuItem searchItem = menu.findItem(R.id.search_item);
+
+            if (searchItem == null) {
+                inflater.inflate(R.menu.search_menu, menu);
+                searchItem = menu.findItem(R.id.search_item);
+            }
+
+            searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+            searchView.setQueryHint(getString(R.string.search_item));
+            searchView.setIconifiedByDefault(true);
+            searchView.setIconified(true);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    if (!query.isEmpty()) {
+                        EventBus.getDefault().post(new SearchSubmittedEvent(query));
+                        searchView.clearFocus();
+                        animeDetails.requestFocus();
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return false;
+                }
+            });
+            searchView.clearFocus();
+            animeDetails.requestFocus();
+        }
     }
 
     public void setAnime(Anime anime) {
