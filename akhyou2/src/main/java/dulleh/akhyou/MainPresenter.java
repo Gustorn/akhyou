@@ -7,6 +7,7 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import dulleh.akhyou.event.FavoriteEvent;
+import dulleh.akhyou.event.OpenAnimeEvent;
 import dulleh.akhyou.event.SearchEvent;
 import dulleh.akhyou.event.SearchSubmittedEvent;
 import dulleh.akhyou.event.SnackbarEvent;
@@ -31,6 +32,10 @@ public class MainPresenter extends RxPresenter<MainActivity> {
     protected void onDestroy() {
         super.onDestroy();
         mainModel = null;
+    }
+
+    public Anime getLastAnime() {
+        return mainModel.getLastAnime();
     }
 
     public MainModel getModel () {
@@ -72,6 +77,10 @@ public class MainPresenter extends RxPresenter<MainActivity> {
             }
         }
         EventBus.getDefault().postSticky(new SearchEvent(event.searchTerm));
+    }
+
+    public void onEvent(OpenAnimeEvent event) {
+        mainModel.lastAnime = event.anime;
     }
 
     public void onEvent (SnackbarEvent event) {

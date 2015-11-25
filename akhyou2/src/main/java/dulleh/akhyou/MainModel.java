@@ -19,7 +19,7 @@ public class MainModel {
 
     private SharedPreferences sharedPreferences;
     private Map<Integer, Anime> favorites;
-    private Anime lastAnime;
+    Anime lastAnime;
 
     public MainModel(Context context) {
         this.sharedPreferences = context.getSharedPreferences(MAIN_STORAGE, Context.MODE_PRIVATE);
@@ -74,4 +74,6 @@ public class MainModel {
             favorites.put(id, anime);
         }
     }
+
+
 }

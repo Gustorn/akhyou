@@ -2,7 +2,6 @@ package dulleh.akhyou.search.item;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,7 +27,6 @@ import nucleus.view.NucleusSupportFragment;
 
 @RequiresPresenter(SearchPresenter.class)
 public class SearchFragment extends NucleusSupportFragment<SearchPresenter> implements AdapterClickListener<Anime> {
-    private SwipeRefreshLayout refreshLayout;
     private RecyclerView.Adapter searchAdapter;
 
     @Nullable
@@ -50,10 +48,6 @@ public class SearchFragment extends NucleusSupportFragment<SearchPresenter> impl
         }
         searchResultsView.setAdapter(searchAdapter);
         searchResultsView.setItemAnimator(new DefaultItemAnimator());
-
-        refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
-        refreshLayout.setColorSchemeResources(R.color.accent);
-        //refreshLayout.setOnRefreshListener(() -> getPresenter().search());
 
         updateRefreshing();
 
@@ -89,7 +83,6 @@ public class SearchFragment extends NucleusSupportFragment<SearchPresenter> impl
                 if (!query.isEmpty()) {
                     //getPresenter().onEvent(new SearchEvent(query));
                     searchView.clearFocus();
-                    refreshLayout.requestFocus();
                 }
                 return true;
             }
@@ -100,7 +93,6 @@ public class SearchFragment extends NucleusSupportFragment<SearchPresenter> impl
             }
         });
         searchView.clearFocus();
-        refreshLayout.requestFocus();
     }
 
     public void updateSearchResults () {
@@ -117,10 +109,6 @@ public class SearchFragment extends NucleusSupportFragment<SearchPresenter> impl
 //        } else if (isRefreshing() && !getPresenter().isRefreshing){
 //            refreshLayout.setRefreshing(false);
 //        }
-    }
-
-    public boolean isRefreshing () {
-        return refreshLayout.isRefreshing();
     }
 
     @Override

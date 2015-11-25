@@ -3,18 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <RelativeLayout
-        android:id="@+id/search_view_main"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/search_view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <!--<android.support.v4.view.ViewPager-->
-        <!--android:id="@+id/search_view_pager"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:focusable="true"-->
-        <!--android:focusableInTouchMode="true"-->
-        <!--android:clickable="true" />-->
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:clickable="true" />
 
     <include layout="@layout/toolbar_shadow"
         android:layout_width="match_parent"

@@ -66,11 +66,6 @@ public class SearchPresenter extends RxPresenter<SearchFragment> {
     }
 
     public void search () {
-        isRefreshing = true;
-        if (getView() != null && !getView().isRefreshing()) {
-            getView().updateRefreshing();
-        }
-
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }

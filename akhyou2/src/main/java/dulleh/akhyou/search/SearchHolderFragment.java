@@ -3,8 +3,8 @@ package dulleh.akhyou.search;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,13 +20,10 @@ import de.greenrobot.event.EventBus;
 import dulleh.akhyou.event.SearchEvent;
 import dulleh.akhyou.anime.Anime;
 import dulleh.akhyou.R;
-import dulleh.akhyou.search.item.SearchFragment;
 
 public class SearchHolderFragment extends Fragment {
     public static int SEARCH_GRID_TYPE = 0;
     public static List<Anime> searchResultsCache = new ArrayList<>(1);
-
-    //ViewPager searchPager;
 
     public static List<Anime> getSearchResults() {
         return searchResultsCache;
@@ -35,6 +32,8 @@ public class SearchHolderFragment extends Fragment {
     public static void setSearchResults(List<Anime> animes) {
         searchResultsCache = animes;
     }
+
+    ViewPager searchPager;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -50,13 +49,10 @@ public class SearchHolderFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.search_holder_fragment, container, false);
-        Fragment searchFragment = new SearchFragment();
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.add(R.id.search_view_main, searchFragment).commit();
-
-        //searchPager = (ViewPager) view.findViewById(R.id.search_view_pager);
-        //SearchHolderAdapter searchHolderAdapter = new SearchHolderAdapter(getChildFragmentManager());
-        //searchPager.setAdapter(searchHolderAdapter);
+        searchPager = (ViewPager) view.findViewById(R.id.search_view_pager);
+        searchPager = (ViewPager) view.findViewById(R.id.search_view_pager);
+        SearchHolderAdapter searchHolderAdapter = new SearchHolderAdapter(getChildFragmentManager());
+        searchPager.setAdapter(searchHolderAdapter);
 
         return view;
     }
@@ -85,7 +81,7 @@ public class SearchHolderFragment extends Fragment {
                     if (!query.isEmpty()) {
                         EventBus.getDefault().postSticky(new SearchEvent(query));
                         searchView.clearFocus();
-                        //searchPager.requestFocus();
+                        searchPager.requestFocus();
                     }
                     return true;
                 }
@@ -96,7 +92,7 @@ public class SearchHolderFragment extends Fragment {
                 }
             });
             searchView.clearFocus();
-            //searchPager.requestFocus();
+            searchPager.requestFocus();
         }
     }
 

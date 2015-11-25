@@ -2,17 +2,19 @@ package dulleh.akhyou.search;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
+
+import dulleh.akhyou.search.item.SearchFragment;
 
 
-public class SearchHolderAdapter extends FragmentStatePagerAdapter{
+public class SearchHolderAdapter extends FragmentPagerAdapter {
     public SearchHolderAdapter(FragmentManager fm) {
         super(fm);
     }
 
     @Override
     public Fragment getItem(int position) {
-        return null;// new SearchFragment();
+        return  new SearchFragment();
     }
 
     @Override

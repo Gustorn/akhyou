@@ -180,8 +180,7 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
                         .replace(R.id.container, new AnimeFragment(), ANIME_FRAGMENT);
 
                 if (fragmentManager.findFragmentByTag(SEARCH_FRAGMENT) != null) {
-                    fragmentTransaction
-                            .addToBackStack(SEARCH_FRAGMENT);
+                    fragmentTransaction.addToBackStack(SEARCH_FRAGMENT);
                 }
 
                 break;
