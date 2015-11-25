@@ -8,7 +8,7 @@ import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 import io.fabric.sdk.android.Fabric;
 
-public class MainApplication extends Application{
+public class MainApplication extends Application {
     public static int RED_ACCENT_RGB = 16777215;
 
     private RefWatcher refWatcher;

@@ -30,33 +30,6 @@
 
         </RelativeLayout>
 
-        <!-- half the height of fab for minheight -->
-        <TextView
-            android:id="@+id/anime_genres_view"
-            android:layout_width="match_parent"
-            android:minHeight="28sp"
-            android:layout_height="wrap_content"
-            android:paddingTop="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="72dp"
-            android:paddingEnd="72dp"
-            android:textColor="?attr/colorPrimaryDark"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@android:color/white" />
-
-        <TextView
-            android:id="@+id/anime_desc_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:textColor="@android:color/black"
-            android:background="@android:color/white"
-            android:gravity="fill_horizontal" />
-
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
@@ -157,6 +130,34 @@
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:background="@drawable/horizontal_shadow_upsidedown_light" />
+
+
+        <!-- half the height of fab for minheight -->
+        <TextView
+            android:id="@+id/anime_genres_view"
+            android:layout_width="match_parent"
+            android:minHeight="28sp"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="72dp"
+            android:paddingEnd="72dp"
+            android:textColor="?attr/colorPrimaryDark"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@android:color/white" />
+
+        <TextView
+            android:id="@+id/anime_desc_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:textColor="@android:color/black"
+            android:background="@android:color/white"
+            android:gravity="fill_horizontal" />
 
     </LinearLayout>
 

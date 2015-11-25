@@ -1,4 +1,4 @@
-package dulleh.akhyou.Anime;
+package dulleh.akhyou.anime;
 
 import java.util.ArrayList;
 

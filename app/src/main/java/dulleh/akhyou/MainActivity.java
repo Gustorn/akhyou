@@ -35,8 +35,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import dulleh.akhyou.Anime.AnimeObject;
-import dulleh.akhyou.Anime.SearchAdapter;
+import dulleh.akhyou.anime.AnimeObject;
+import dulleh.akhyou.anime.SearchAdapter;
 import dulleh.akhyou.Episodes.AlternateObjects;
 import dulleh.akhyou.Episodes.EpisodeObject;
 import dulleh.akhyou.Episodes.EpisodesAdapter;

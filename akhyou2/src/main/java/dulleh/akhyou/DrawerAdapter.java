@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import dulleh.akhyou.Models.Anime;
-import dulleh.akhyou.Utils.AdapterClickListener;
+import dulleh.akhyou.anime.Anime;
+import dulleh.akhyou.util.AdapterClickListener;
 
 public class DrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final AdapterClickListener<Anime> adapterClickListener;
@@ -55,12 +55,7 @@ public class DrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 itemViewHolder.iconView.setColorFilter(majorColour, PorterDuff.Mode.SRC_ATOP);
             }
             itemViewHolder.titleView.setText(getItem(position).getTitle());
-            itemViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    adapterClickListener.onCLick(getItem(position), position);
-                }
-            });
+            itemViewHolder.itemView.setOnClickListener(view -> adapterClickListener.onCLick(getItem(position), position));
         }
     }
 

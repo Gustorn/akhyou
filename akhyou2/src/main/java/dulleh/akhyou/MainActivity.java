@@ -1,6 +1,5 @@
 package dulleh.akhyou;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -11,22 +10,19 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 
 import de.greenrobot.event.EventBus;
-import dulleh.akhyou.Anime.AnimeFragment;
-import dulleh.akhyou.Models.Anime;
-import dulleh.akhyou.Search.Holder.SearchHolderFragment;
-import dulleh.akhyou.Settings.SettingsFragment;
-import dulleh.akhyou.Utils.AdapterClickListener;
-import dulleh.akhyou.Utils.CloudflareHttpClient;
-import dulleh.akhyou.Utils.Events.OpenAnimeEvent;
-import dulleh.akhyou.Utils.Events.SettingsItemSelectedEvent;
-import dulleh.akhyou.Utils.Events.SnackbarEvent;
+import dulleh.akhyou.anime.AnimeFragment;
+import dulleh.akhyou.event.OpenAnimeEvent;
+import dulleh.akhyou.event.SnackbarEvent;
+import dulleh.akhyou.search.SearchHolderFragment;
+import dulleh.akhyou.anime.Anime;
+import dulleh.akhyou.util.AdapterClickListener;
+import dulleh.akhyou.network.CloudflareHttpClient;
+import nucleus.factory.PresenterFactory;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusAppCompatActivity;
 
@@ -44,6 +40,11 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
     public static final String SETTINGS_FRAGMENT = "SET";
 
     @Override
+    public PresenterFactory<MainPresenter> getPresenterFactory() {
+        return () -> new MainPresenter(getApplicationContext());
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme();
         super.onCreate(savedInstanceState);
@@ -53,25 +54,16 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
 
         sharedPreferences = getPreferences(MODE_PRIVATE);
         fragmentManager = getSupportFragmentManager();
-
-        getPresenter().setSharedPreferences(sharedPreferences);
-
         parentLayout = (FrameLayout) findViewById(R.id.container);
-
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         RelativeLayout drawerSettingsButton = (RelativeLayout) findViewById(R.id.drawer_settings);
-        drawerSettingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getPresenter().onEvent(new SettingsItemSelectedEvent());
-            }
-        });
+        drawerSettingsButton.setOnClickListener(view -> {}); //getPresenter().onEvent(new SettingsItemSelectedEvent()));
         favouritesList = (RecyclerView) findViewById(R.id.drawer_recycler_view);
         favouritesList.setLayoutManager(new LinearLayoutManager(this));
 
-        getPresenter().refreshFavouritesList();
-        setFavouritesAdapter();
+        // getPresenter().refreshFavouritesList();
+        // setFavoritesAdapter();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //toolbar.setContentInsetsRelative(0, 0);
@@ -80,26 +72,11 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // must be after set as actionbar
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-        });
+        toolbar.setNavigationOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
 
-        Intent openingIntent = getIntent();
-
-        if (openingIntent.getAction() != null && openingIntent.getAction().equals(Intent.ACTION_SEND)) {
-            String intentExtra = openingIntent.getStringExtra(Intent.EXTRA_TEXT);
-
-            if (intentExtra != null && intentExtra.contains("hummingbird.me/anime/")) {
-                getPresenter().launchFromHbLink(intentExtra);
-            }
-
-        } else if (savedInstanceState == null){
+        if (savedInstanceState == null) {
             getPresenter().onFreshStart(this);
         }
-
     }
 
     @Override
@@ -116,7 +93,7 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
 
     private void setTheme () {
         sharedPreferences = getPreferences(MODE_PRIVATE);
-        int themePref = sharedPreferences.getInt(SettingsFragment.THEME_PREFERENCE, 0);
+        int themePref = sharedPreferences.getInt(getApplicationContext().getString(R.string.akhyou_red_theme), 0);
 
         switch (themePref) {
             case 1:
@@ -208,21 +185,21 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
                 }
 
                 break;
-
-            case SETTINGS_FRAGMENT:
-                fragmentTransaction
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .replace(R.id.container, new SettingsFragment(), SETTINGS_FRAGMENT);
-
-                if (fragmentManager.findFragmentByTag(ANIME_FRAGMENT) != null) {
-                    fragmentTransaction
-                            .addToBackStack(ANIME_FRAGMENT);
-                } else { // only other situation settings could have been opened in
-                    fragmentTransaction
-                            .addToBackStack(SEARCH_FRAGMENT);
-                }
-
-                break;
+//
+//            case SETTINGS_FRAGMENT:
+//                fragmentTransaction
+//                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+//                        .replace(R.id.container, new SettingsFragment(), SETTINGS_FRAGMENT);
+//
+//                if (fragmentManager.findFragmentByTag(ANIME_FRAGMENT) != null) {
+//                    fragmentTransaction
+//                            .addToBackStack(ANIME_FRAGMENT);
+//                } else { // only other situation settings could have been opened in
+//                    fragmentTransaction
+//                            .addToBackStack(SEARCH_FRAGMENT);
+//                }
+//
+//                break;
         }
         fragmentTransaction.commit();
     }
@@ -247,14 +224,14 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
         } else {
             EventBus.getDefault().postSticky(new OpenAnimeEvent(item));
         }
-
-        if (fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) != null) {
-            fragmentManager
-                    .beginTransaction()
-                    .remove(fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT))
-                    .commit();
-            fragmentManager.popBackStack();
-        }
+//
+//        if (fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) != null) {
+//            fragmentManager
+//                    .beginTransaction()
+//                    .remove(fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT))
+//                    .commit();
+//            fragmentManager.popBackStack();
+//        }
 
         closeDrawer();
     }
@@ -264,12 +241,12 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
 
     }
 
-    private void setFavouritesAdapter () {
+    private void setFavoritesAdapter() {
         drawerAdapter = new DrawerAdapter(this, getPresenter().getFavourites());
         favouritesList.setAdapter(drawerAdapter);
     }
 
-    public void favouritesChanged () {
+    public void favoritesChanged() {
         if (drawerAdapter != null) {
             drawerAdapter.setFavourites(getPresenter().getFavourites());
             drawerAdapter.notifyDataSetChanged();
@@ -279,21 +256,4 @@ public class MainActivity extends NucleusAppCompatActivity<MainPresenter> implem
             drawerAdapter.notifyDataSetChanged();
         }
     }
-
-    public void promptForUpdate (String newUpdateVersion) {
-        new MaterialDialog.Builder(this)
-                .title(getString(R.string.update_title))
-                .content(newUpdateVersion)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        super.onPositive(dialog);
-                        getPresenter().downloadUpdate(MainModel.LATEST_RELEASE_LINK);
-                    }
-                })
-                .positiveText(getString(R.string.update))
-                .negativeText(getString(R.string.cancel))
-                .show();
-    }
-
 }
